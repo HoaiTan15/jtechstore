@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý khuyến mãi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-jtech">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/admin/dashboard">J-Tech Admin</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="adminNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/dashboard">Dashboard</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        Quản lý
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
+                        <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Về website</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <span class="nav-link user-badge">
+                        Xin chào,
+                        <span th:text="${session.currentUser != null ? session.currentUser.fullName : 'Admin'}"></span>
+                    </span>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Đăng xuất</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Quản lý khuyến mãi</h2>
+        <a href="/admin/promotions/add" class="btn btn-jtech">Thêm khuyến mãi</a>
+    </div>
+
+    <table class="table table-bordered table-hover mt-3 bg-white shadow-sm">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên khuyến mãi</th>
+            <th>Giảm (%)</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Hoạt động</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="p : ${promotions}">
+            <td th:text="${p.id}"></td>
+            <td th:text="${p.name}"></td>
+            <td th:text="${p.discountPercent}"></td>
+            <td th:text="${p.startDate}"></td>
+            <td th:text="${p.endDate}"></td>
+            <td>
+                <span class="badge bg-success" th:if="${p.active == true}">Có</span>
+                <span class="badge bg-danger" th:if="${p.active != true}">Không</span>
+            </td>
+            <td>
+                <a th:href="@{/admin/promotions/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm">Sửa</a>
+                <a th:href="@{/admin/promotions/delete/{id}(id=${p.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Xóa khuyến mãi này?')">Xóa</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

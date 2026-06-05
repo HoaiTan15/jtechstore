@@ -1,0 +1,132 @@
+body {
+    background-color: #f4f8fc;
+    color: #1f2d3d;
+    font-family: Arial, sans-serif;
+}
+
+.navbar-jtech {
+    background: linear-gradient(90deg, #0b3d91, #145da0);
+}
+
+.navbar-jtech .navbar-brand,
+.navbar-jtech .nav-link {
+    color: white !important;
+    font-weight: 500;
+}
+
+.navbar-jtech .nav-link:hover {
+    color: #d6ecff !important;
+}
+
+.card-jtech-header {
+    background: linear-gradient(90deg, #0b3d91, #145da0);
+    color: white;
+    font-weight: bold;
+}
+
+.btn-jtech {
+    background-color: #1e66d0;
+    border-color: #1e66d0;
+    color: white;
+}
+
+.btn-jtech:hover {
+    background-color: #1557b0;
+    border-color: #1557b0;
+    color: white;
+}
+
+.btn-outline-jtech {
+    border: 1px solid #1e66d0;
+    color: #1e66d0;
+    background-color: white;
+}
+
+.btn-outline-jtech:hover {
+    background-color: #1e66d0;
+    color: white;
+}
+
+.hero-jtech {
+    background: linear-gradient(135deg, #eaf4ff, #d8ecff);
+    border-left: 6px solid #145da0;
+}
+
+.alert-jtech {
+    background-color: #d9efff;
+    border: 1px solid #9fd0ff;
+    color: #114a7a;
+}
+
+.badge-jtech {
+    background-color: #145da0;
+    color: white;
+}
+
+.card-hover:hover {
+    transform: translateY(-3px);
+    transition: 0.2s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.table thead {
+    background-color: #d8ecff;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+.navbar-jtech {
+    background: linear-gradient(90deg, #0b3d91, #145da0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-jtech .navbar-brand {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff !important;
+}
+
+.navbar-jtech .nav-link {
+    color: #eef6ff !important;
+    font-weight: 500;
+    padding: 8px 12px !important;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.navbar-jtech .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff !important;
+}
+
+.navbar-jtech .dropdown-menu {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.navbar-jtech .dropdown-item {
+    font-weight: 500;
+}
+
+.navbar-jtech .dropdown-item:hover {
+    background-color: #eaf4ff;
+    color: #0b3d91;
+}
+
+.user-badge {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: white !important;
+    border-radius: 20px;
+    padding: 8px 14px !important;
+    white-space: nowrap;
+}
+
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.6);
+}
