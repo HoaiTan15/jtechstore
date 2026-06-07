@@ -1,6 +1,6 @@
 # J-Tech Store
 
-J-Tech Store là website kinh doanh thiết bị công nghệ được xây dựng bằng Java Spring Boot. Hệ thống hỗ trợ khách hàng xem sản phẩm, tìm kiếm/lọc sản phẩm, thêm giỏ hàng, đặt hàng, thanh toán COD/QR chuyển khoản, đánh giá sản phẩm sau khi mua hàng. Phân hệ admin hỗ trợ quản lý danh mục, sản phẩm, tồn kho, khuyến mãi, đơn hàng, khách hàng, đánh giá và dashboard thống kê.
+J-Tech Store là website kinh doanh thiết bị công nghệ được xây dựng bằng Java Spring Boot. Hệ thống hỗ trợ khách hàng xem sản phẩm, tìm kiếm/lọc sản phẩm, thêm giỏ hàng, đặt hàng, thanh toán COD hoặc QR chuyển khoản, đánh giá sản phẩm sau khi mua hàng. Phân hệ admin hỗ trợ quản lý danh mục, sản phẩm, tồn kho, khuyến mãi, đơn hàng, khách hàng, đánh giá, import sản phẩm bằng Excel và dashboard thống kê.
 
 ## 1. Công nghệ sử dụng
 
@@ -12,6 +12,7 @@ J-Tech Store là website kinh doanh thiết bị công nghệ được xây dự
 - Bootstrap 5
 - SQL Server
 - Maven
+- Apache POI để đọc/ghi file Excel
 - Cloudflared Tunnel để chia sẻ web tạm thời
 
 ## 2. Chức năng chính
@@ -45,6 +46,8 @@ J-Tech Store là website kinh doanh thiết bị công nghệ được xây dự
 - Dashboard thống kê
 - Quản lý danh mục
 - Quản lý sản phẩm
+- Import nhiều sản phẩm từ file Excel
+- Tải file Excel mẫu để import sản phẩm
 - Quản lý tồn kho
 - Cảnh báo sản phẩm sắp hết hàng / hết hàng
 - Quản lý khuyến mãi và coupon
@@ -91,25 +94,26 @@ CREATE DATABASE JTechStore;
 Thông tin mặc định trong `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=JTechStore;encrypt=true;trustServerCertificate=true
-spring.datasource.username=sa
-spring.datasource.password=123
+spring.datasource.url=${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=JTechStore;encrypt=true;trustServerCertificate=true}
+spring.datasource.username=${DB_USERNAME:sa}
+spring.datasource.password=${DB_PASSWORD:123}
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
 ```
 
 Có thể đổi tài khoản SQL Server bằng biến môi trường:
 
-```properties
+```text
 DB_URL
 DB_USERNAME
 DB_PASSWORD
 ```
 
-Ví dụ:
+Ví dụ chạy bằng PowerShell:
 
-```properties
-spring.datasource.url=${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=JTechStore;encrypt=true;trustServerCertificate=true}
-spring.datasource.username=${DB_USERNAME:sa}
-spring.datasource.password=${DB_PASSWORD:123}
+```powershell
+$env:DB_USERNAME="sa"
+$env:DB_PASSWORD="123"
+mvn spring-boot:run
 ```
 
 ## 5. Cấu hình email quên mật khẩu
@@ -137,7 +141,13 @@ $env:MAIL_PASSWORD="mat_khau_ung_dung_gmail"
 mvn spring-boot:run
 ```
 
-Lưu ý: không đưa mật khẩu Gmail thật lên GitHub.
+Lưu ý:
+
+- Không đưa mật khẩu Gmail thật lên GitHub.
+- Không dùng mật khẩu đăng nhập Gmail thường.
+- Gmail cần bật xác minh 2 bước trước khi tạo App Password.
+- Tạo Gmail App Password tại: https://myaccount.google.com/apppasswords
+- Hướng dẫn chính thức của Google: https://support.google.com/mail/answer/185833
 
 ## 6. Cách chạy project
 
@@ -208,7 +218,65 @@ http://localhost:8080/admin/users
 http://localhost:8080/admin/reviews
 ```
 
-## 9. Chạy public bằng Cloudflared
+## 9. Import sản phẩm bằng Excel
+
+Admin có thể nhập nhiều sản phẩm cùng lúc bằng file Excel.
+
+Truy cập:
+
+```text
+http://localhost:8080/admin/products
+```
+
+Sau đó bấm:
+
+```text
+Nhập Excel
+```
+
+Trong form import, admin có thể:
+
+- Tải mẫu Excel Import
+- Nhập dữ liệu sản phẩm theo mẫu
+- Upload file Excel `.xlsx` hoặc `.xls`
+- Bấm `Kiểm tra & nhập dữ liệu`
+- Hệ thống kiểm tra dữ liệu và lưu sản phẩm vào database
+
+### Các cột trong file Excel
+
+```text
+Tên sản phẩm
+Danh mục
+Thương hiệu
+Giá gốc
+Số lượng
+Ảnh URL
+CPU
+RAM
+Ổ cứng
+Màn hình
+Bảo hành
+Mô tả
+```
+
+### Quy tắc import
+
+- Dòng đầu tiên là tiêu đề cột.
+- Dữ liệu sản phẩm bắt đầu từ dòng thứ hai.
+- Tên sản phẩm không được để trống.
+- Giá gốc không được trống và không được âm.
+- Số lượng không được trống và không được âm.
+- Nếu danh mục chưa tồn tại, hệ thống tự động tạo danh mục mới.
+- Ảnh URL có thể để trống rồi cập nhật sau.
+
+### Route import
+
+```text
+GET  /admin/products/import-template
+POST /admin/products/import
+```
+
+## 10. Chạy public bằng Cloudflared
 
 Sau khi Spring Boot đang chạy ở port 8080, mở terminal mới và chạy:
 
@@ -224,7 +292,7 @@ https://ten-ngau-nhien.trycloudflare.com
 
 Copy link này để gửi người khác test website.
 
-## 10. Cấu trúc thư mục chính
+## 11. Cấu trúc thư mục chính
 
 ```text
 src
@@ -247,7 +315,7 @@ src
         └── application.properties
 ```
 
-## 11. Ghi chú khi chạy
+## 12. Ghi chú khi chạy
 
 Nếu ảnh sản phẩm không hiển thị, kiểm tra thư mục:
 
@@ -260,6 +328,8 @@ Nếu không gửi được email quên mật khẩu, kiểm tra:
 - Đã cấu hình `MAIL_USERNAME`
 - Đã cấu hình `MAIL_PASSWORD`
 - Gmail phải dùng App Password, không dùng mật khẩu tài khoản thường
+- Tài khoản Gmail đã bật xác minh 2 bước
+- Có thể tạo App Password tại: https://myaccount.google.com/apppasswords
 
 Nếu không kết nối được database, kiểm tra:
 
@@ -268,7 +338,14 @@ Nếu không kết nối được database, kiểm tra:
 - Database `JTechStore` đã tồn tại
 - Username/password SQL Server đúng
 
-## 12. Lệnh Git thường dùng
+Nếu import Excel bị lỗi, kiểm tra:
+
+- File có đúng định dạng `.xlsx` hoặc `.xls`
+- Dòng đầu tiên là tiêu đề
+- Tên sản phẩm, giá gốc và số lượng không được để trống
+- Giá gốc và số lượng không được âm
+
+## 13. Lệnh Git thường dùng
 
 Kiểm tra trạng thái:
 
@@ -294,7 +371,7 @@ Push lên GitHub:
 git push origin main
 ```
 
-## 13. Tác giả
+## 14. Tác giả
 
 Sinh viên thực hiện: Phan Hoài Tân
 
