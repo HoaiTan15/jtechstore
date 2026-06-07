@@ -85,7 +85,42 @@
 </nav>
 
 <div class="container mt-4 mb-5">
-    <h2>Dashboard quản trị</h2>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h2 class="mb-0">Dashboard quản trị</h2>
+
+        <form method="get" action="/admin/dashboard" class="d-flex align-items-end gap-2">
+            <div>
+                <label class="form-label mb-1">Tháng</label>
+                <select class="form-select" name="month">
+                    <option value="1" th:selected="${selectedMonth == 1}">01</option>
+                    <option value="2" th:selected="${selectedMonth == 2}">02</option>
+                    <option value="3" th:selected="${selectedMonth == 3}">03</option>
+                    <option value="4" th:selected="${selectedMonth == 4}">04</option>
+                    <option value="5" th:selected="${selectedMonth == 5}">05</option>
+                    <option value="6" th:selected="${selectedMonth == 6}">06</option>
+                    <option value="7" th:selected="${selectedMonth == 7}">07</option>
+                    <option value="8" th:selected="${selectedMonth == 8}">08</option>
+                    <option value="9" th:selected="${selectedMonth == 9}">09</option>
+                    <option value="10" th:selected="${selectedMonth == 10}">10</option>
+                    <option value="11" th:selected="${selectedMonth == 11}">11</option>
+                    <option value="12" th:selected="${selectedMonth == 12}">12</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="form-label mb-1">Năm</label>
+                <input class="form-control"
+                       type="number"
+                       name="year"
+                       min="2000"
+                       th:value="${selectedYear}">
+            </div>
+
+            <button class="btn btn-jtech" type="submit">
+                Lọc doanh thu
+            </button>
+        </form>
+    </div>
 
     <div class="row mt-3">
         <div class="col-md-3 mb-3">
@@ -133,12 +168,44 @@
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm h-100">
                 <div class="card-header card-jtech-header">Doanh thu hoàn thành</div>
+
                 <div class="card-body">
                     <h4 class="text-danger"
                         th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                         0 VNĐ
                     </h4>
-                    <p class="mb-0">Chỉ tính đơn đã hoàn thành.</p>
+
+                    <p class="mb-2">Tổng doanh thu tất cả đơn đã hoàn thành.</p>
+
+                    <a href="/admin/dashboard/export-total-revenue"
+                       class="btn btn-outline-jtech btn-sm">
+                        Xuất Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header card-jtech-header">
+                    Doanh thu tháng <span th:text="${selectedMonth}">1</span>/<span th:text="${selectedYear}">2026</span>
+                </div>
+
+                <div class="card-body">
+                    <h4 class="text-danger"
+                        th:text="${#numbers.formatDecimal(monthlyRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        0 VNĐ
+                    </h4>
+
+                    <p class="mb-2">
+                        Đơn hoàn thành:
+                        <strong th:text="${monthlyCompletedOrders}">0</strong>
+                    </p>
+
+                    <a th:href="@{/admin/dashboard/export-monthly-revenue(month=${selectedMonth}, year=${selectedYear})}"
+                       class="btn btn-outline-jtech btn-sm">
+                        Xuất Excel
+                    </a>
                 </div>
             </div>
         </div>
