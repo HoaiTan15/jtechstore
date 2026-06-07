@@ -73,11 +73,26 @@
     <div class="d-flex justify-content-between align-items-center">
         <h2>Quản lý sản phẩm</h2>
 
-        <div>
-            <a href="/admin/products/inventory" class="btn btn-outline-jtech">Tồn kho</a>
-            <a href="/admin/products/add" class="btn btn-jtech">Thêm sản phẩm</a>
+        <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-outline-jtech"
+                    data-bs-toggle="modal"
+                    data-bs-target="#importProductModal">
+                Nhập Excel
+            </button>
+
+            <a href="/admin/products/inventory" class="btn btn-outline-jtech">
+                Tồn kho
+            </a>
+
+            <a href="/admin/products/add" class="btn btn-jtech">
+                Thêm sản phẩm
+            </a>
         </div>
     </div>
+
+    <div class="alert alert-success mt-3" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger mt-3" th:if="${error}" th:text="${error}"></div>
 
     <div class="row mt-3">
         <div class="col-md-6 mb-2">
@@ -161,7 +176,9 @@
             </td>
 
             <td>
-                <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm">Sửa</a>
+                <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm">
+                    Sửa
+                </a>
 
                 <a th:href="@{/admin/products/delete/{id}(id=${p.id})}"
                    class="btn btn-danger btn-sm"
@@ -175,6 +192,62 @@
 
     <div th:if="${products == null or products.isEmpty()}" class="alert alert-jtech">
         Chưa có sản phẩm nào.
+    </div>
+</div>
+
+<div class="modal fade" id="importProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(90deg, #0b3d91, #145da0); color: white;">
+                <h5 class="modal-title">Nhập sản phẩm từ Excel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" action="/admin/products/import" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="alert alert-jtech">
+                        File Excel cần dùng đúng mẫu. Hệ thống sẽ đọc sheet đầu tiên và import các dòng sản phẩm hợp lệ.
+                    </div>
+
+                    <div class="border rounded-4 p-4 text-center bg-light mb-3">
+                        <div style="font-size: 54px; color: #145da0;">☁</div>
+                        <label class="form-label fw-bold">Chọn file Excel <span class="text-danger">*</span></label>
+
+                        <input class="form-control mt-2"
+                               type="file"
+                               name="excelFile"
+                               accept=".xlsx,.xls"
+                               required>
+
+                        <div class="form-text mt-2">
+                            Hỗ trợ file .xlsx hoặc .xls. Dòng đầu tiên là tiêu đề cột.
+                        </div>
+                    </div>
+
+                    <div class="border rounded p-3 bg-white">
+                        <strong>Các cột trong file mẫu:</strong>
+                        <div class="mt-2">
+                            Tên sản phẩm, Danh mục, Thương hiệu, Giá gốc, Số lượng, Ảnh URL,
+                            CPU, RAM, Ổ cứng, Màn hình, Bảo hành, Mô tả.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a href="/admin/products/import-template" class="btn btn-outline-jtech">
+                        Tải mẫu Excel Import
+                    </a>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Đóng
+                    </button>
+
+                    <button type="submit" class="btn btn-jtech">
+                        Kiểm tra & nhập dữ liệu
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
