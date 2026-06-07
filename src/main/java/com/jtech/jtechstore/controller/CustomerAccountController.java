@@ -2,8 +2,11 @@ package com.jtech.jtechstore.controller;
 
 import com.jtech.jtechstore.model.AppUser;
 import com.jtech.jtechstore.model.Order;
+import com.jtech.jtechstore.model.OrderDetail;
+import com.jtech.jtechstore.model.Product;
 import com.jtech.jtechstore.repository.AppUserRepository;
 import com.jtech.jtechstore.repository.OrderRepository;
+import com.jtech.jtechstore.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,11 +20,14 @@ public class CustomerAccountController {
 
     private final AppUserRepository appUserRepository;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
     public CustomerAccountController(AppUserRepository appUserRepository,
-                                     OrderRepository orderRepository) {
+                                     OrderRepository orderRepository,
+                                     ProductRepository productRepository) {
         this.appUserRepository = appUserRepository;
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
     }
 
     private AppUser getCurrentUser(HttpSession session) {
@@ -82,6 +88,54 @@ public class CustomerAccountController {
         return "customer/order-detail";
     }
 
+    @PostMapping("/don-hang/{id}/huy")
+    public String cancelOrder(@PathVariable Long id,
+                              HttpSession session,
+                              Model model) {
+        AppUser currentUser = getCurrentUser(session);
+
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        if (order.getUser() == null || !order.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này");
+        }
+
+        if (!Order.STATUS_PENDING.equals(order.getStatus())) {
+            model.addAttribute("currentUser", currentUser);
+            model.addAttribute("order", order);
+            model.addAttribute("error", "Chỉ có thể hủy đơn hàng khi đang ở trạng thái Chờ xác nhận.");
+            return "customer/order-detail";
+        }
+
+        if (order.getOrderDetails() != null) {
+            for (OrderDetail detail : order.getOrderDetails()) {
+                Product product = detail.getProduct();
+
+                if (product != null) {
+                    int currentStock = product.getQuantity() != null ? product.getQuantity() : 0;
+                    int returnQuantity = detail.getQuantity() != null ? detail.getQuantity() : 0;
+
+                    product.setQuantity(currentStock + returnQuantity);
+                    productRepository.save(product);
+                }
+            }
+        }
+
+        order.setStatus(Order.STATUS_CANCELLED);
+        orderRepository.save(order);
+
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("order", order);
+        model.addAttribute("success", "Hủy đơn hàng thành công. Số lượng sản phẩm đã được hoàn lại kho.");
+
+        return "customer/order-detail";
+    }
+
     @GetMapping("/cap-nhat")
     public String updateProfileForm(HttpSession session, Model model) {
         AppUser currentUser = getCurrentUser(session);
@@ -110,6 +164,9 @@ public class CustomerAccountController {
         user.setFullName(formUser.getFullName());
         user.setPhone(formUser.getPhone());
         user.setEmail(formUser.getEmail());
+        user.setProvinceName(formUser.getProvinceName());
+        user.setWardName(formUser.getWardName());
+        user.setAddressDetail(formUser.getAddressDetail());
 
         AppUser savedUser = appUserRepository.save(user);
         session.setAttribute("currentUser", savedUser);
@@ -163,6 +220,7 @@ public class CustomerAccountController {
         }
 
         user.setPassword(newPassword);
+
         AppUser savedUser = appUserRepository.save(user);
         session.setAttribute("currentUser", savedUser);
 

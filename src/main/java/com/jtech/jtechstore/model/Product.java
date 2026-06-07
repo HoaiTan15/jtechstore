@@ -31,7 +31,9 @@ public class Product {
     @Column(columnDefinition = "NVARCHAR(255)")
     private String imageUrl;
 
-    private Integer quantity;
+    @NotNull(message = "Số lượng không được để trống")
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
+    private Integer quantity = 0;
 
     @Column(columnDefinition = "NVARCHAR(255)")
     private String brand;
@@ -83,5 +85,21 @@ public class Product {
         }
 
         return promotion.getDiscountPercent();
+    }
+
+    public boolean isInStock() {
+        return quantity != null && quantity > 0;
+    }
+
+    public boolean isLowStock() {
+        return quantity != null && quantity > 0 && quantity < 5;
+    }
+
+    public boolean canBuy(int buyQuantity) {
+        if (buyQuantity <= 0) {
+            return false;
+        }
+
+        return quantity != null && quantity >= buyQuantity;
     }
 }

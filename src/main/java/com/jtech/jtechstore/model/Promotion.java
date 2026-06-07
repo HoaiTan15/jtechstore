@@ -16,6 +16,9 @@ import java.util.List;
 @Entity
 @Table(name = "promotions")
 public class Promotion {
+    public static final String DISCOUNT_PERCENT = "PERCENT";
+    public static final String DISCOUNT_AMOUNT = "AMOUNT";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,9 +27,35 @@ public class Promotion {
     @Column(columnDefinition = "NVARCHAR(255)")
     private String name;
 
+    /*
+     * Dùng cho giảm giá trực tiếp trên sản phẩm.
+     * Ví dụ: sản phẩm A được gắn khuyến mãi giảm 10%.
+     */
     @Min(value = 0, message = "Phần trăm giảm giá không được âm")
     @Max(value = 100, message = "Phần trăm giảm giá không được vượt quá 100")
     private Double discountPercent;
+
+    /*
+     * Dùng cho mã coupon nhập lúc thanh toán.
+     * Ví dụ:
+     * couponCode = JTECH10
+     * discountType = PERCENT
+     * couponValue = 10
+     * minOrderAmount = 500000
+     */
+    @Column(columnDefinition = "NVARCHAR(100)", unique = true)
+    private String couponCode;
+
+    @Column(columnDefinition = "NVARCHAR(50)")
+    private String discountType = DISCOUNT_PERCENT;
+
+    private Double couponValue;
+
+    private Double minOrderAmount = 0.0;
+
+    private Integer usageLimit;
+
+    private Integer usedCount = 0;
 
     private LocalDate startDate;
 
@@ -53,5 +82,55 @@ public class Promotion {
         }
 
         return true;
+    }
+
+    public boolean isCoupon() {
+        return couponCode != null && !couponCode.trim().isEmpty();
+    }
+
+    public boolean canUseCoupon(double orderTotal) {
+        if (!isCoupon()) {
+            return false;
+        }
+
+        if (!isValidNow()) {
+            return false;
+        }
+
+        if (minOrderAmount != null && orderTotal < minOrderAmount) {
+            return false;
+        }
+
+        if (usageLimit != null && usageLimit > 0) {
+            int currentUsed = usedCount != null ? usedCount : 0;
+            return currentUsed < usageLimit;
+        }
+
+        return true;
+    }
+
+    public double calculateCouponDiscount(double orderTotal) {
+        if (!canUseCoupon(orderTotal)) {
+            return 0;
+        }
+
+        if (couponValue == null || couponValue <= 0) {
+            return 0;
+        }
+
+        if (DISCOUNT_AMOUNT.equals(discountType)) {
+            return Math.min(couponValue, orderTotal);
+        }
+
+        double percentDiscount = orderTotal * couponValue / 100;
+        return Math.min(percentDiscount, orderTotal);
+    }
+
+    public void increaseUsedCount() {
+        if (usedCount == null) {
+            usedCount = 0;
+        }
+
+        usedCount++;
     }
 }

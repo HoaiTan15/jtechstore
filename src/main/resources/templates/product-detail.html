@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết sản phẩm</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,7 +14,14 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
+        <a class="navbar-brand brand-logo-link"
+           th:href="${session.currentUser != null and session.currentUser.role == 'ADMIN'} ? @{/admin/dashboard} : @{/}">
+            <span class="brand-logo-box">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     class="brand-logo-img">
+            </span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -23,15 +34,17 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/products">Sản phẩm</a>
+                    <a class="nav-link active" href="/products">Sản phẩm</a>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link" href="/cart">Giỏ hàng</a>
                 </li>
+
                 <li class="nav-item" th:if="${session.currentUser != null and session.currentUser.role == 'USER'}">
                     <a class="nav-link" href="/tai-khoan">Tài khoản</a>
                 </li>
+
                 <li class="nav-item dropdown"
                     th:if="${session.currentUser != null and session.currentUser.role == 'ADMIN'}">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -40,11 +53,13 @@
 
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
-                        <li><a class="dropdown-item" href="/admin/categories">QL Danh mục</a></li>
-                        <li><a class="dropdown-item" href="/admin/products">QL Sản phẩm</a></li>
-                        <li><a class="dropdown-item" href="/admin/promotions">QL Khuyến mãi</a></li>
-                        <li><a class="dropdown-item" href="/admin/orders">QL Đơn hàng</a></li>
-                        <li><a class="dropdown-item" href="/admin/users">QL Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
+                        <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/products/inventory">Tồn kho</a></li>
+                        <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/reviews">Đánh giá</a></li>
                     </ul>
                 </li>
             </ul>
@@ -73,49 +88,110 @@
     </div>
 </nav>
 
-<div class="container mt-4">
-    <div class="row">
+<div class="container mt-4 mb-5">
+    <div class="row align-items-start">
         <div class="col-md-5">
-            <img th:src="${product.imageUrl}"
-                 class="img-fluid rounded shadow-sm"
-                 alt="Ảnh sản phẩm"
-                 onerror="this.src='/images/products/no-image.jpg'">
+            <div class="product-detail-image-box">
+                <img th:src="${product.imageUrl}"
+                     class="product-detail-image"
+                     alt="Ảnh sản phẩm"
+                     onerror="this.src='/images/products/no-image.jpg'">
+            </div>
         </div>
 
         <div class="col-md-7">
             <h2 th:text="${product.name}">Tên sản phẩm</h2>
 
             <p>
-                <span class="badge bg-secondary" th:if="${product.brand != null}" th:text="${product.brand}"></span>
-                <span class="badge badge-jtech" th:if="${product.category != null}" th:text="${product.category.name}"></span>
+                <span class="badge bg-secondary"
+                      th:if="${product.brand != null}"
+                      th:text="${product.brand}">
+                </span>
+
+                <span class="badge badge-jtech"
+                      th:if="${product.category != null}"
+                      th:text="${product.category.name}">
+                </span>
             </p>
 
             <p>
                 Đánh giá:
-                <strong class="text-warning" th:text="${#numbers.formatDecimal(averageRating, 1, 1)} + '/5'"></strong>
+                <strong class="text-warning"
+                        th:text="${#numbers.formatDecimal(averageRating, 1, 1)} + '/5'">
+                </strong>
                 (<span th:text="${reviewCount}"></span> đánh giá)
             </p>
 
             <p class="text-muted text-decoration-line-through"
                th:if="${product.discountPercent > 0}"
-               th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+               th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+            </p>
 
             <h4 class="text-danger"
-                th:text="${#numbers.formatDecimal(product.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></h4>
+                th:text="${#numbers.formatDecimal(product.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+            </h4>
 
             <p th:text="${product.description}"></p>
 
-            <table class="table table-bordered bg-white">
-                <tr><th>CPU</th><td th:text="${product.cpu}"></td></tr>
-                <tr><th>RAM</th><td th:text="${product.ram}"></td></tr>
-                <tr><th>Ổ cứng</th><td th:text="${product.storage}"></td></tr>
-                <tr><th>Màn hình</th><td th:text="${product.screen}"></td></tr>
-                <tr><th>Bảo hành</th><td th:text="${product.warranty}"></td></tr>
-                <tr><th>Tồn kho</th><td th:text="${product.quantity}"></td></tr>
+            <table class="table table-bordered bg-white shadow-sm">
+                <tr>
+                    <th style="width: 35%;">CPU</th>
+                    <td th:text="${product.cpu}"></td>
+                </tr>
+
+                <tr>
+                    <th>RAM</th>
+                    <td th:text="${product.ram}"></td>
+                </tr>
+
+                <tr>
+                    <th>Ổ cứng</th>
+                    <td th:text="${product.storage}"></td>
+                </tr>
+
+                <tr>
+                    <th>Màn hình</th>
+                    <td th:text="${product.screen}"></td>
+                </tr>
+
+                <tr>
+                    <th>Bảo hành</th>
+                    <td th:text="${product.warranty}"></td>
+                </tr>
+
+                <tr>
+                    <th>Tồn kho</th>
+                    <td>
+                        <span th:text="${product.quantity}"></span>
+
+                        <span class="badge bg-danger ms-1"
+                              th:if="${product.quantity != null and product.quantity > 0 and product.quantity < 5}">
+                            Sắp hết
+                        </span>
+
+                        <span class="badge bg-secondary ms-1"
+                              th:if="${product.quantity == null or product.quantity <= 0}">
+                            Hết hàng
+                        </span>
+                    </td>
+                </tr>
             </table>
 
-            <a th:href="@{/cart/add/{id}(id=${product.id})}" class="btn btn-jtech">Thêm vào giỏ</a>
-            <a href="/products" class="btn btn-secondary">Quay lại</a>
+            <a th:href="@{/cart/add/{id}(id=${product.id})}"
+               class="btn btn-jtech"
+               th:if="${product.quantity != null and product.quantity > 0}">
+                Thêm vào giỏ
+            </a>
+
+            <button class="btn btn-secondary"
+                    disabled
+                    th:if="${product.quantity == null or product.quantity <= 0}">
+                Hết hàng
+            </button>
+
+            <a href="/products" class="btn btn-secondary">
+                Quay lại
+            </a>
         </div>
     </div>
 
@@ -180,11 +256,30 @@
                     Tất cả (<span th:text="${reviewCount}"></span>)
                 </a>
 
-                <a th:href="@{/products/{id}(id=${product.id}, rating=5)}" class="btn btn-outline-warning btn-sm">5 sao (<span th:text="${rating5Count}"></span>)</a>
-                <a th:href="@{/products/{id}(id=${product.id}, rating=4)}" class="btn btn-outline-warning btn-sm">4 sao (<span th:text="${rating4Count}"></span>)</a>
-                <a th:href="@{/products/{id}(id=${product.id}, rating=3)}" class="btn btn-outline-warning btn-sm">3 sao (<span th:text="${rating3Count}"></span>)</a>
-                <a th:href="@{/products/{id}(id=${product.id}, rating=2)}" class="btn btn-outline-warning btn-sm">2 sao (<span th:text="${rating2Count}"></span>)</a>
-                <a th:href="@{/products/{id}(id=${product.id}, rating=1)}" class="btn btn-outline-warning btn-sm">1 sao (<span th:text="${rating1Count}"></span>)</a>
+                <a th:href="@{/products/{id}(id=${product.id}, rating=5)}"
+                   class="btn btn-outline-warning btn-sm">
+                    5 sao (<span th:text="${rating5Count}"></span>)
+                </a>
+
+                <a th:href="@{/products/{id}(id=${product.id}, rating=4)}"
+                   class="btn btn-outline-warning btn-sm">
+                    4 sao (<span th:text="${rating4Count}"></span>)
+                </a>
+
+                <a th:href="@{/products/{id}(id=${product.id}, rating=3)}"
+                   class="btn btn-outline-warning btn-sm">
+                    3 sao (<span th:text="${rating3Count}"></span>)
+                </a>
+
+                <a th:href="@{/products/{id}(id=${product.id}, rating=2)}"
+                   class="btn btn-outline-warning btn-sm">
+                    2 sao (<span th:text="${rating2Count}"></span>)
+                </a>
+
+                <a th:href="@{/products/{id}(id=${product.id}, rating=1)}"
+                   class="btn btn-outline-warning btn-sm">
+                    1 sao (<span th:text="${rating1Count}"></span>)
+                </a>
             </div>
 
             <div th:if="${reviews == null or reviews.isEmpty()}" class="alert alert-jtech">
@@ -195,10 +290,17 @@
                 <div class="card-body">
                     <h6>
                         <span th:text="${r.customerName}">Tên khách</span>
-                        <span class="badge bg-warning text-dark" th:text="${r.rating} + ' sao'"></span>
+
+                        <span class="badge bg-warning text-dark"
+                              th:text="${r.rating} + ' sao'">
+                        </span>
                     </h6>
+
                     <p th:text="${r.comment}">Nội dung đánh giá</p>
-                    <small class="text-muted" th:text="${#temporals.format(r.reviewDate, 'dd/MM/yyyy HH:mm')}"></small>
+
+                    <small class="text-muted"
+                           th:text="${#temporals.format(r.reviewDate, 'dd/MM/yyyy HH:mm')}">
+                    </small>
                 </div>
             </div>
         </div>
@@ -207,20 +309,38 @@
     <hr class="my-4">
 
     <h3>Sản phẩm cùng danh mục</h3>
+
     <div class="row">
         <div class="col-md-3 mb-3" th:each="p : ${relatedProducts}">
             <div class="card h-100 shadow-sm card-hover">
-                <img th:src="${p.imageUrl}" class="card-img-top" style="height: 170px; object-fit: cover;">
+                <div class="related-product-image-box">
+                    <img th:src="${p.imageUrl}"
+                         class="related-product-image"
+                         alt="Ảnh sản phẩm"
+                         onerror="this.src='/images/products/no-image.jpg'">
+                </div>
+
                 <div class="card-body">
-                    <h6 th:text="${p.name}"></h6>
+                    <h6 th:text="${p.name}">Tên sản phẩm</h6>
+
                     <p class="text-danger fw-bold"
-                       th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
-                    <a th:href="@{/products/{id}(id=${p.id})}" class="btn btn-outline-jtech btn-sm">Chi tiết</a>
+                       th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                    </p>
+
+                    <a th:href="@{/products/{id}(id=${p.id})}"
+                       class="btn btn-outline-jtech btn-sm">
+                        Chi tiết
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+
+    <div th:if="${relatedProducts == null or relatedProducts.isEmpty()}" class="alert alert-jtech">
+        Chưa có sản phẩm cùng danh mục.
+    </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -4,26 +4,117 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* Navbar */
 .navbar-jtech {
     background: linear-gradient(90deg, #0b3d91, #145da0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-height: 72px;
 }
 
-.navbar-jtech .navbar-brand,
+.navbar-jtech .navbar-brand {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
 .navbar-jtech .nav-link {
-    color: white !important;
+    color: #eef6ff !important;
+    font-weight: 500;
+    padding: 8px 12px !important;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.navbar-jtech .nav-link:hover,
+.navbar-jtech .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff !important;
+}
+
+.navbar-jtech .dropdown-menu {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.navbar-jtech .dropdown-item {
     font-weight: 500;
 }
 
-.navbar-jtech .nav-link:hover {
-    color: #d6ecff !important;
+.navbar-jtech .dropdown-item:hover,
+.navbar-jtech .dropdown-item.active {
+    background-color: #eaf4ff;
+    color: #0b3d91;
 }
 
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.user-badge {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: white !important;
+    border-radius: 20px;
+    padding: 8px 14px !important;
+    white-space: nowrap;
+}
+
+/* Logo J-Tech trong navbar - giống Dashboard Admin */
+.brand-logo-link {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin-right: 24px !important;
+    flex-shrink: 0 !important;
+}
+
+.brand-logo-box,
+.brand-logo-box-public {
+    width: 170px !important;
+    height: 58px !important;
+    background-color: #ffffff !important;
+    border-radius: 14px !important;
+    padding: 6px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+}
+
+.brand-logo-img,
+.brand-logo-img-public {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+    transform: none !important;
+}
+
+/* Chặn trường hợp file nào còn dùng img trực tiếp trong navbar-brand */
+.navbar-jtech .navbar-brand > img {
+    max-width: 150px !important;
+    max-height: 48px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+/* Card */
 .card-jtech-header {
     background: linear-gradient(90deg, #0b3d91, #145da0);
     color: white;
     font-weight: bold;
 }
 
+.card-hover:hover {
+    transform: translateY(-3px);
+    transition: 0.2s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Button */
 .btn-jtech {
     background-color: #1e66d0;
     border-color: #1e66d0;
@@ -47,32 +138,31 @@ body {
     color: white;
 }
 
+/* Hero */
 .hero-jtech {
     background: linear-gradient(135deg, #eaf4ff, #d8ecff);
     border-left: 6px solid #145da0;
 }
 
+/* Alert */
 .alert-jtech {
     background-color: #d9efff;
     border: 1px solid #9fd0ff;
     color: #114a7a;
 }
 
+/* Badge */
 .badge-jtech {
     background-color: #145da0;
     color: white;
 }
 
-.card-hover:hover {
-    transform: translateY(-3px);
-    transition: 0.2s ease;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
+/* Table */
 .table thead {
     background-color: #d8ecff;
 }
 
+/* Link */
 a {
     text-decoration: none;
 }
@@ -80,53 +170,39 @@ a {
 a:hover {
     text-decoration: none;
 }
-.navbar-jtech {
-    background: linear-gradient(90deg, #0b3d91, #145da0);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+/* Product detail image */
+.product-detail-image-box {
+    width: 100%;
+    height: 390px;
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.navbar-jtech .navbar-brand {
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff !important;
+.product-detail-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-.navbar-jtech .nav-link {
-    color: #eef6ff !important;
-    font-weight: 500;
-    padding: 8px 12px !important;
-    border-radius: 8px;
-    margin: 0 2px;
+/* Related product image */
+.related-product-image-box {
+    width: 100%;
+    height: 170px;
+    background-color: #ffffff;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.navbar-jtech .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.16);
-    color: #ffffff !important;
-}
-
-.navbar-jtech .dropdown-menu {
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-}
-
-.navbar-jtech .dropdown-item {
-    font-weight: 500;
-}
-
-.navbar-jtech .dropdown-item:hover {
-    background-color: #eaf4ff;
-    color: #0b3d91;
-}
-
-.user-badge {
-    background-color: rgba(255, 255, 255, 0.18);
-    color: white !important;
-    border-radius: 20px;
-    padding: 8px 14px !important;
-    white-space: nowrap;
-}
-
-.navbar-toggler {
-    border-color: rgba(255, 255, 255, 0.6);
+.related-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }

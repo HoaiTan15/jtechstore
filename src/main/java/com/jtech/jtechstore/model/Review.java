@@ -3,6 +3,7 @@ package com.jtech.jtechstore.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class Review {
     @Max(value = 5, message = "Số sao tối đa là 5")
     private Integer rating;
 
+    @NotBlank(message = "Nội dung đánh giá không được để trống")
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String comment;
 
@@ -37,4 +39,11 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private AppUser user;
+
+    @PrePersist
+    public void prePersist() {
+        if (reviewDate == null) {
+            reviewDate = LocalDateTime.now();
+        }
+    }
 }

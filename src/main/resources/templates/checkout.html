@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Đặt hàng</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,7 +14,14 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
+        <a class="navbar-brand brand-logo-link"
+           th:href="${session.currentUser != null and session.currentUser.role == 'ADMIN'} ? @{/admin/dashboard} : @{/}">
+            <span class="brand-logo-box">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     class="brand-logo-img">
+            </span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -18,21 +29,14 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Trang chủ</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/products">Sản phẩm</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/cart">Giỏ hàng</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="/cart">Giỏ hàng</a></li>
 
                 <li class="nav-item" th:if="${session.currentUser != null and session.currentUser.role == 'USER'}">
                     <a class="nav-link" href="/tai-khoan">Tài khoản</a>
                 </li>
+
                 <li class="nav-item dropdown"
                     th:if="${session.currentUser != null and session.currentUser.role == 'ADMIN'}">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -41,11 +45,13 @@
 
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
-                        <li><a class="dropdown-item" href="/admin/categories">QL Danh mục</a></li>
-                        <li><a class="dropdown-item" href="/admin/products">QL Sản phẩm</a></li>
-                        <li><a class="dropdown-item" href="/admin/promotions">QL Khuyến mãi</a></li>
-                        <li><a class="dropdown-item" href="/admin/orders">QL Đơn hàng</a></li>
-                        <li><a class="dropdown-item" href="/admin/users">QL Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
+                        <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/products/inventory">Tồn kho</a></li>
+                        <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/reviews">Đánh giá</a></li>
                     </ul>
                 </li>
             </ul>
@@ -74,40 +80,88 @@
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <h2>Thông tin đặt hàng</h2>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
 
     <div class="row">
         <div class="col-md-7">
             <form method="post" action="/checkout" class="card card-body shadow-sm">
                 <div class="mb-3">
                     <label class="form-label">Họ tên</label>
-                    <input class="form-control" name="customerName"
-                           th:value="${currentUser != null ? currentUser.fullName : ''}" required>
+                    <input class="form-control"
+                           name="customerName"
+                           th:value="${customerName != null ? customerName : (currentUser != null ? currentUser.fullName : '')}"
+                           required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Số điện thoại</label>
-                    <input class="form-control" name="phone"
-                           th:value="${currentUser != null ? currentUser.phone : ''}" required>
+                    <input class="form-control"
+                           name="phone"
+                           th:value="${phone != null ? phone : (currentUser != null ? currentUser.phone : '')}"
+                           required>
+                    <div class="form-text">Số điện thoại phải gồm 9 đến 11 chữ số.</div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Địa chỉ giao hàng</label>
-                    <textarea class="form-control" name="address" rows="3" required></textarea>
+
+                    <textarea class="form-control"
+                              name="address"
+                              rows="3"
+                              required
+                              th:text="${address != null ? address :
+                              (currentUser != null ?
+                              ((currentUser.addressDetail != null ? currentUser.addressDetail : '') +
+                              (currentUser.wardName != null and !currentUser.wardName.isEmpty() ? ', ' + currentUser.wardName : '') +
+                              (currentUser.provinceName != null and !currentUser.provinceName.isEmpty() ? ', ' + currentUser.provinceName : ''))
+                              : '')}">
+                    </textarea>
+
+                    <div class="form-text">
+                        Nếu địa chỉ chưa đúng, bạn có thể sửa trực tiếp tại đây hoặc cập nhật trong mục Tài khoản.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mã giảm giá / Coupon</label>
+                    <input class="form-control"
+                           name="couponCode"
+                           th:value="${couponCode != null ? couponCode : ''}"
+                           placeholder="Ví dụ: JTECH10">
+                    <div class="form-text">
+                        Mã giảm giá sẽ được kiểm tra khi xác nhận đặt hàng.
+                    </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Phương thức thanh toán</label>
 
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" value="COD" id="cod" checked>
-                        <label class="form-check-label" for="cod">Thanh toán tiền mặt khi nhận hàng</label>
+                        <input class="form-check-input"
+                               type="radio"
+                               name="paymentMethod"
+                               value="COD"
+                               id="cod"
+                               th:checked="${paymentMethod == null or paymentMethod == 'COD'}">
+                        <label class="form-check-label" for="cod">
+                            Thanh toán tiền mặt khi nhận hàng
+                        </label>
                     </div>
 
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" value="BANK_TRANSFER" id="bank">
-                        <label class="form-check-label" for="bank">Chuyển khoản ngân hàng bằng mã QR</label>
+                        <input class="form-check-input"
+                               type="radio"
+                               name="paymentMethod"
+                               value="BANK_TRANSFER"
+                               id="bank"
+                               th:checked="${paymentMethod == 'BANK_TRANSFER'}">
+                        <label class="form-check-label" for="bank">
+                            Chuyển khoản ngân hàng bằng mã QR
+                        </label>
                     </div>
                 </div>
 
@@ -118,26 +172,62 @@
 
         <div class="col-md-5">
             <div class="card shadow-sm">
-                <div class="card-header card-jtech-header">Đơn hàng của bạn</div>
+                <div class="card-header card-jtech-header">
+                    Đơn hàng của bạn
+                </div>
+
                 <div class="card-body">
                     <div th:each="item : ${cartItems}" class="border-bottom mb-2 pb-2">
-                        <strong th:text="${item.product.name}"></strong><br>
-                        Số lượng: <span th:text="${item.quantity}"></span><br>
-                        Thành tiền:
+                        <strong th:text="${item.product.name}">Tên sản phẩm</strong><br>
+
+                        Số lượng mua:
+                        <span th:text="${item.quantity}">1</span><br>
+
+                        Tồn kho:
+                        <span th:text="${item.product.quantity}">0</span><br>
+
+                        <span class="badge bg-danger"
+                              th:if="${item.product.quantity != null and item.product.quantity < 5}">
+                            Sắp hết hàng
+                        </span>
+
+                        <br th:if="${item.product.quantity != null and item.product.quantity < 5}">
+
+                        Đơn giá:
                         <span class="text-danger"
-                              th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                              th:text="${#numbers.formatDecimal(item.product.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </span><br>
+
+                        Thành tiền:
+                        <span class="text-danger fw-bold"
+                              th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </span>
                     </div>
 
                     <h5 class="mt-3">
-                        Tổng:
+                        Tạm tính:
                         <span class="text-danger"
-                              th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                              th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </span>
                     </h5>
+
+                    <div class="alert alert-jtech mt-3 mb-0">
+                        Nếu nhập mã coupon hợp lệ, hệ thống sẽ tự trừ vào tổng tiền khi tạo đơn hàng.
+                    </div>
                 </div>
+            </div>
+
+            <div class="alert alert-jtech mt-3">
+                Sau khi đặt hàng, nếu chọn chuyển khoản, hệ thống sẽ hiển thị mã QR thanh toán.
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                Hệ thống sẽ tự kiểm tra tồn kho trước khi tạo đơn hàng. Nếu số lượng mua vượt quá tồn kho, đơn hàng sẽ không được tạo.
             </div>
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

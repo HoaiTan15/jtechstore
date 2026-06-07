@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Cập nhật thông tin</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,17 +14,54 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
-        <div class="navbar-nav">
-            <a class="nav-link" href="/">Trang chủ</a>
-            <a class="nav-link" href="/products">Sản phẩm</a>
-            <a class="nav-link" href="/tai-khoan">Tài khoản</a>
-            <a class="nav-link" href="/logout">Đăng xuất</a>
+        <a class="navbar-brand brand-logo-link" href="/">
+            <span class="brand-logo-box">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     class="brand-logo-img">
+            </span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Trang chủ</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Sản phẩm</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart">Giỏ hàng</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/tai-khoan">Tài khoản</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item" th:if="${session.currentUser != null}">
+                    <span class="nav-link user-badge">
+                        Xin chào,
+                        <span th:text="${session.currentUser.fullName != null ? session.currentUser.fullName : session.currentUser.username}"></span>
+                    </span>
+                </li>
+
+                <li class="nav-item" th:if="${session.currentUser != null}">
+                    <a class="nav-link" href="/logout">Đăng xuất</a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4" style="max-width: 650px;">
+<div class="container mt-4 mb-5" style="max-width: 750px;">
     <div class="card shadow-sm">
         <div class="card-header card-jtech-header">Cập nhật thông tin cá nhân</div>
 
@@ -33,6 +74,9 @@
                 <input type="hidden" th:field="*{password}">
                 <input type="hidden" th:field="*{role}">
                 <input type="hidden" th:field="*{enabled}">
+
+                <input type="hidden" id="provinceName" th:field="*{provinceName}">
+                <input type="hidden" id="wardName" th:field="*{wardName}">
 
                 <div class="mb-3">
                     <label class="form-label">Tên đăng nhập</label>
@@ -54,11 +98,121 @@
                     <input class="form-control" type="email" th:field="*{email}">
                 </div>
 
+                <hr>
+
+                <h5>Địa chỉ khách hàng</h5>
+
+                <div class="mb-3">
+                    <label class="form-label">Tỉnh / Thành phố</label>
+                    <select class="form-select" id="provinceSelect">
+                        <option value="">-- Chọn tỉnh/thành --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phường / Xã</label>
+                    <select class="form-select" id="wardSelect">
+                        <option value="">-- Chọn phường/xã --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ cụ thể</label>
+                    <textarea class="form-control" rows="3" th:field="*{addressDetail}"
+                              placeholder="Ví dụ: Số nhà, tên đường, ấp/khu phố..."></textarea>
+                </div>
+
                 <button class="btn btn-jtech">Lưu thông tin</button>
                 <a href="/tai-khoan" class="btn btn-secondary">Quay lại</a>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    const API_BASE = "https://provinces.open-api.vn/api/v2";
+
+    const provinceSelect = document.getElementById("provinceSelect");
+    const wardSelect = document.getElementById("wardSelect");
+
+    const provinceNameInput = document.getElementById("provinceName");
+    const wardNameInput = document.getElementById("wardName");
+
+    const oldProvinceName = provinceNameInput.value;
+    const oldWardName = wardNameInput.value;
+
+    async function loadProvinces() {
+        try {
+            const response = await fetch(`${API_BASE}/p/`);
+            const provinces = await response.json();
+
+            provinces.forEach(province => {
+                const option = document.createElement("option");
+                option.value = province.code;
+                option.textContent = province.name;
+                option.dataset.name = province.name;
+
+                if (province.name === oldProvinceName) {
+                    option.selected = true;
+                }
+
+                provinceSelect.appendChild(option);
+            });
+
+            if (provinceSelect.value) {
+                await loadWards(provinceSelect.value);
+            }
+        } catch (error) {
+            console.error("Lỗi tải tỉnh/thành:", error);
+        }
+    }
+
+    async function loadWards(provinceCode) {
+        wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+
+        if (!provinceCode) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/p/${provinceCode}?depth=2`);
+            const province = await response.json();
+
+            const wards = province.wards || [];
+
+            wards.forEach(ward => {
+                const option = document.createElement("option");
+                option.value = ward.code;
+                option.textContent = ward.name;
+                option.dataset.name = ward.name;
+
+                if (ward.name === oldWardName) {
+                    option.selected = true;
+                }
+
+                wardSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Lỗi tải phường/xã:", error);
+        }
+    }
+
+    provinceSelect.addEventListener("change", async function () {
+        const selected = provinceSelect.options[provinceSelect.selectedIndex];
+        provinceNameInput.value = selected.dataset.name || "";
+        wardNameInput.value = "";
+
+        await loadWards(provinceSelect.value);
+    });
+
+    wardSelect.addEventListener("change", function () {
+        const selected = wardSelect.options[wardSelect.selectedIndex];
+        wardNameInput.value = selected.dataset.name || "";
+    });
+
+    loadProvinces();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

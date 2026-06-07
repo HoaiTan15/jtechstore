@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>J-Tech Store</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,7 +14,28 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
+        <a class="navbar-brand"
+           th:href="${session.currentUser != null and session.currentUser.role == 'ADMIN'} ? @{/admin/dashboard} : @{/}"
+           style="display:flex !important; align-items:center !important; padding:0 !important; margin-right:24px !important;">
+            <span style="width:170px !important;
+                         height:58px !important;
+                         background:#ffffff !important;
+                         border-radius:14px !important;
+                         padding:6px 12px !important;
+                         display:flex !important;
+                         align-items:center !important;
+                         justify-content:center !important;
+                         overflow:hidden !important;">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     style="max-width:100% !important;
+                            max-height:100% !important;
+                            width:auto !important;
+                            height:auto !important;
+                            object-fit:contain !important;
+                            display:block !important;">
+            </span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -19,7 +44,7 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="/">Trang chủ</a>
+                    <a class="nav-link active" href="/">Trang chủ</a>
                 </li>
 
                 <li class="nav-item">
@@ -29,9 +54,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/cart">Giỏ hàng</a>
                 </li>
+
                 <li class="nav-item" th:if="${session.currentUser != null and session.currentUser.role == 'USER'}">
                     <a class="nav-link" href="/tai-khoan">Tài khoản</a>
                 </li>
+
                 <li class="nav-item dropdown"
                     th:if="${session.currentUser != null and session.currentUser.role == 'ADMIN'}">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -40,11 +67,13 @@
 
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
-                        <li><a class="dropdown-item" href="/admin/categories">QL Danh mục</a></li>
-                        <li><a class="dropdown-item" href="/admin/products">QL Sản phẩm</a></li>
-                        <li><a class="dropdown-item" href="/admin/promotions">QL Khuyến mãi</a></li>
-                        <li><a class="dropdown-item" href="/admin/orders">QL Đơn hàng</a></li>
-                        <li><a class="dropdown-item" href="/admin/users">QL Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
+                        <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/products/inventory">Tồn kho</a></li>
+                        <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/reviews">Đánh giá</a></li>
                     </ul>
                 </li>
             </ul>
@@ -73,14 +102,18 @@
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <div class="p-5 hero-jtech rounded shadow-sm">
         <h1>Website kinh doanh thiết bị công nghệ J-Tech Store</h1>
         <p>Chuyên laptop, điện thoại, phụ kiện và thiết bị công nghệ.</p>
+
         <a href="/products" class="btn btn-jtech">Xem sản phẩm</a>
+
         <a href="/admin/dashboard"
            class="btn btn-outline-jtech"
-           th:if="${session.currentUser != null and session.currentUser.role == 'ADMIN'}">Xem Dashboard</a>
+           th:if="${session.currentUser != null and session.currentUser.role == 'ADMIN'}">
+            Xem Dashboard
+        </a>
     </div>
 
     <h3 class="mt-4 mb-3">Danh mục sản phẩm</h3>
@@ -125,31 +158,41 @@
                     <p class="mb-1">
                         <span class="badge bg-secondary"
                               th:if="${p.brand != null and !p.brand.isEmpty()}"
-                              th:text="${p.brand}"></span>
+                              th:text="${p.brand}">
+                        </span>
+
                         <span class="badge badge-jtech"
                               th:if="${p.category != null}"
-                              th:text="${p.category.name}"></span>
+                              th:text="${p.category.name}">
+                        </span>
                     </p>
 
                     <div class="mb-2">
                         <p class="text-muted text-decoration-line-through mb-1"
                            th:if="${p.discountPercent > 0}"
-                           th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+                           th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </p>
 
                         <p class="fw-bold text-danger mb-1"
-                           th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+                           th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                        </p>
 
                         <span class="badge bg-danger"
                               th:if="${p.discountPercent > 0}"
-                              th:text="'Giảm ' + ${p.discountPercent} + '%'"></span>
+                              th:text="'Giảm ' + ${p.discountPercent} + '%'">
+                        </span>
                     </div>
 
                     <div class="d-flex gap-2">
                         <a th:href="@{/products/{id}(id=${p.id})}"
-                           class="btn btn-outline-jtech btn-sm">Chi tiết</a>
+                           class="btn btn-outline-jtech btn-sm">
+                            Chi tiết
+                        </a>
 
                         <a th:href="@{/cart/add/{id}(id=${p.id})}"
-                           class="btn btn-jtech btn-sm">Thêm giỏ</a>
+                           class="btn btn-jtech btn-sm">
+                            Thêm giỏ
+                        </a>
                     </div>
                 </div>
             </div>
@@ -160,6 +203,7 @@
         Hiện chưa có sản phẩm nào.
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

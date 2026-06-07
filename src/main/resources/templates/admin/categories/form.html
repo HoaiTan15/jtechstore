@@ -2,7 +2,8 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Form danh mục</title>
+    <title>Quản lý sản phẩm</title>
+    <link rel="icon" type="image/png" href="/images/logos/logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,7 +11,10 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/admin/dashboard">J-Tech Admin</a>
+        <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+            <img src="/images/logos/logochinh-removebg.png" alt="J-Tech" style="height: 42px; width: auto; margin-right: 8px;">
+            <span style="color: white; font-weight: 700;">Admin</span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -18,27 +22,24 @@
 
         <div class="collapse navbar-collapse" id="adminNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/dashboard">Dashboard</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
                         Quản lý
                     </a>
 
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
                         <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/products/inventory">Tồn kho</a></li>
                         <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
                         <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
                         <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
                     </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Về website</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/">Về website</a></li>
             </ul>
 
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -49,38 +50,121 @@
                     </span>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Đăng xuất</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/logout">Đăng xuất</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4" style="max-width: 700px;">
-    <div class="card shadow-sm">
-        <div class="card-header card-jtech-header">Thông tin danh mục</div>
-        <div class="card-body">
-            <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
-                <input type="hidden" th:field="*{id}">
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Quản lý sản phẩm</h2>
 
-                <div class="mb-3">
-                    <label class="form-label">Tên danh mục</label>
-                    <input class="form-control" th:field="*{name}">
-                    <div class="text-danger" th:errors="*{name}"></div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Mô tả</label>
-                    <textarea class="form-control" rows="3" th:field="*{description}"></textarea>
-                </div>
-
-                <button class="btn btn-jtech">Lưu</button>
-                <a href="/admin/categories" class="btn btn-secondary">Quay lại</a>
-            </form>
+        <div>
+            <a href="/admin/products/inventory" class="btn btn-outline-jtech">Tồn kho</a>
+            <a href="/admin/products/add" class="btn btn-jtech">Thêm sản phẩm</a>
         </div>
     </div>
+
+    <div class="row mt-3">
+        <div class="col-md-6 mb-2">
+            <div class="alert alert-warning mb-0">
+                Sản phẩm sắp hết hàng: <strong th:text="${lowStockCount}">0</strong>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <div class="alert alert-danger mb-0">
+                Sản phẩm hết hàng: <strong th:text="${outOfStockCount}">0</strong>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover mt-3 bg-white shadow-sm align-middle">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ảnh</th>
+            <th>Tên</th>
+            <th>Danh mục</th>
+            <th>Thương hiệu</th>
+            <th>Giá gốc</th>
+            <th>Giá bán</th>
+            <th>SL</th>
+            <th>Trạng thái kho</th>
+            <th>KM</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="p : ${products}">
+            <td th:text="${p.id}"></td>
+
+            <td>
+                <img th:src="${p.imageUrl}"
+                     style="width: 70px; height: 55px; object-fit: contain; background: white; border: 1px solid #ddd; border-radius: 6px;"
+                     onerror="this.src='/images/products/no-image.jpg'">
+            </td>
+
+            <td>
+                <strong th:text="${p.name}"></strong>
+            </td>
+
+            <td th:text="${p.category != null ? p.category.name : ''}"></td>
+            <td th:text="${p.brand}"></td>
+
+            <td th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+
+            <td class="text-danger fw-bold"
+                th:text="${#numbers.formatDecimal(p.salePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+
+            <td th:text="${p.quantity}"></td>
+
+            <td>
+                <span class="badge bg-success" th:if="${p.quantity != null and p.quantity >= 5}">
+                    Còn hàng
+                </span>
+
+                <span class="badge bg-warning text-dark"
+                      th:if="${p.quantity != null and p.quantity > 0 and p.quantity < 5}">
+                    Sắp hết
+                </span>
+
+                <span class="badge bg-danger"
+                      th:if="${p.quantity == null or p.quantity <= 0}">
+                    Hết hàng
+                </span>
+            </td>
+
+            <td>
+                <span th:if="${p.promotion != null}" th:text="${p.promotion.name}"></span>
+                <span th:if="${p.promotion == null}">Không</span>
+
+                <span class="badge bg-danger ms-1"
+                      th:if="${p.discountPercent > 0}"
+                      th:text="'-' + ${#numbers.formatDecimal(p.discountPercent, 0, 'COMMA', 0, 'POINT')} + '%'">
+                </span>
+            </td>
+
+            <td>
+                <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm">Sửa</a>
+
+                <a th:href="@{/admin/products/delete/{id}(id=${p.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Xóa sản phẩm này?')">
+                    Xóa
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${products == null or products.isEmpty()}" class="alert alert-jtech">
+        Chưa có sản phẩm nào.
+    </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

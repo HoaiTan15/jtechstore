@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Đặt hàng thành công</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,7 +14,14 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
+        <a class="navbar-brand brand-logo-link"
+           th:href="${session.currentUser != null and session.currentUser.role == 'ADMIN'} ? @{/admin/dashboard} : @{/}">
+            <span class="brand-logo-box">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     class="brand-logo-img">
+            </span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -33,6 +44,7 @@
                 <li class="nav-item" th:if="${session.currentUser != null and session.currentUser.role == 'USER'}">
                     <a class="nav-link" href="/tai-khoan">Tài khoản</a>
                 </li>
+
                 <li class="nav-item dropdown"
                     th:if="${session.currentUser != null and session.currentUser.role == 'ADMIN'}">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -41,11 +53,13 @@
 
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
-                        <li><a class="dropdown-item" href="/admin/categories">QL Danh mục</a></li>
-                        <li><a class="dropdown-item" href="/admin/products">QL Sản phẩm</a></li>
-                        <li><a class="dropdown-item" href="/admin/promotions">QL Khuyến mãi</a></li>
-                        <li><a class="dropdown-item" href="/admin/orders">QL Đơn hàng</a></li>
-                        <li><a class="dropdown-item" href="/admin/users">QL Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
+                        <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/products/inventory">Tồn kho</a></li>
+                        <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/reviews">Đánh giá</a></li>
                     </ul>
                 </li>
             </ul>
@@ -73,28 +87,75 @@
         </div>
     </div>
 </nav>
-<div class="container mt-4">
+
+<div class="container mt-4 mb-5">
+    <div class="alert alert-success shadow-sm" th:if="${success}" th:text="${success}"></div>
+
     <div class="alert alert-jtech shadow-sm">
         <h2>Đặt hàng thành công!</h2>
+
         <p>Mã đơn hàng: <strong th:text="${order.id}"></strong></p>
         <p>Khách hàng: <strong th:text="${order.customerName}"></strong></p>
         <p>Số điện thoại: <strong th:text="${order.phone}"></strong></p>
         <p>Địa chỉ: <strong th:text="${order.address}"></strong></p>
+
+        <hr>
+
         <p>
-            Tổng tiền:
-            <strong class="text-danger"
-                    th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong>
+            Tạm tính:
+            <strong th:text="${#numbers.formatDecimal(order.subtotalAmount != null ? order.subtotalAmount : order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong>
         </p>
-        <p>Trạng thái đơn hàng: <strong th:text="${order.status}"></strong></p>
-        <p>Trạng thái thanh toán: <strong th:text="${order.paymentStatus}"></strong></p>
+
+        <p th:if="${order.couponCode != null and !order.couponCode.isEmpty()}">
+            Mã giảm giá:
+            <strong class="text-primary" th:text="${order.couponCode}"></strong>
+        </p>
+
+        <p th:if="${order.discountAmount != null and order.discountAmount > 0}">
+            Số tiền giảm:
+            <strong class="text-success"
+                    th:text="'-' + ${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+            </strong>
+        </p>
+
+        <p>
+            Tổng thanh toán:
+            <strong class="text-danger"
+                    th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+            </strong>
+        </p>
+
+        <hr>
+
+        <p>
+            Phương thức:
+            <strong th:if="${order.paymentMethod == 'COD'}">Thanh toán khi nhận hàng</strong>
+            <strong th:if="${order.paymentMethod == 'BANK_TRANSFER'}">Chuyển khoản ngân hàng</strong>
+            <strong th:if="${order.paymentMethod != 'COD' and order.paymentMethod != 'BANK_TRANSFER'}"
+                    th:text="${order.paymentMethod}">
+            </strong>
+        </p>
+
+        <p>
+            Trạng thái đơn hàng:
+            <strong th:text="${order.status}"></strong>
+        </p>
+
+        <p>
+            Trạng thái thanh toán:
+            <strong th:text="${order.paymentStatus}"></strong>
+        </p>
     </div>
 
-    <div class="card shadow-sm mb-3" th:if="${order.paymentMethod == 'BANK_TRANSFER'}">
+    <div class="card shadow-sm mb-3"
+         th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.status != 'Đã hủy'}">
         <div class="card-header card-jtech-header">QR thanh toán</div>
+
         <div class="card-body text-center">
             <p>Quét mã QR để thanh toán đơn hàng.</p>
 
-            <img th:src="@{/qr/payment/{id}(id=${order.id})}" alt="QR thanh toán"
+            <img th:src="@{/qr/payment/{id}(id=${order.id})}"
+                 alt="QR thanh toán"
                  style="width: 260px; max-width: 100%;">
 
             <div class="mt-3">
@@ -102,23 +163,43 @@
                 <p><strong>Số tài khoản:</strong> 0773 7833 901</p>
                 <p><strong>Chủ tài khoản:</strong> PHAN HOAI TAN</p>
                 <p><strong>Nội dung chuyển khoản:</strong> <span th:text="'JTECH' + ${order.id}"></span></p>
+
                 <p>
                     <strong>Số tiền:</strong>
                     <span class="text-danger"
-                          th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                          th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                    </span>
                 </p>
             </div>
 
-            <form th:action="@{/checkout/confirm-payment/{id}(id=${order.id})}" method="post"
+            <form th:action="@{/checkout/confirm-payment/{id}(id=${order.id})}"
+                  method="post"
                   th:if="${order.paymentStatus != 'Đã thanh toán'}">
-                <button class="btn btn-jtech">Tôi đã thanh toán</button>
+                <button class="btn btn-jtech"
+                        onclick="return confirm('Bạn xác nhận đã chuyển khoản cho đơn hàng này?')">
+                    Tôi đã thanh toán
+                </button>
             </form>
+
+            <div class="alert alert-success mt-3"
+                 th:if="${order.paymentStatus == 'Đã thanh toán'}">
+                Đơn hàng này đã được xác nhận thanh toán.
+            </div>
         </div>
     </div>
 
-    <a href="/products" class="btn btn-jtech">Tiếp tục mua hàng</a>
-    <a href="/" class="btn btn-secondary">Trang chủ</a>
+    <div class="d-flex gap-2">
+        <a href="/products" class="btn btn-jtech">Tiếp tục mua hàng</a>
+
+        <a href="/tai-khoan/lich-su" class="btn btn-outline-jtech"
+           th:if="${session.currentUser != null and session.currentUser.role == 'USER'}">
+            Xem lịch sử đơn hàng
+        </a>
+
+        <a href="/" class="btn btn-secondary">Trang chủ</a>
+    </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

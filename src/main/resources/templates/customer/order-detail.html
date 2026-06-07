@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết đơn hàng</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,42 +14,142 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
-        <div class="navbar-nav">
-            <a class="nav-link" href="/">Trang chủ</a>
-            <a class="nav-link" href="/products">Sản phẩm</a>
-            <a class="nav-link" href="/cart">Giỏ hàng</a>
-            <a class="nav-link" href="/tai-khoan">Tài khoản</a>
-            <a class="nav-link" href="/logout">Đăng xuất</a>
+        <a class="navbar-brand brand-logo-link" href="/">
+            <span class="brand-logo-box">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     class="brand-logo-img">
+            </span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Trang chủ</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Sản phẩm</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart">Giỏ hàng</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/tai-khoan">Tài khoản</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <span class="nav-link user-badge">
+                        Xin chào,
+                        <span th:text="${currentUser != null and currentUser.fullName != null ? currentUser.fullName : (currentUser != null ? currentUser.username : 'Khách hàng')}"></span>
+                    </span>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Đăng xuất</a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
-    <h2>Chi tiết đơn hàng #<span th:text="${order.id}"></span></h2>
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Chi tiết đơn hàng #<span th:text="${order.id}"></span></h2>
+        <a href="/tai-khoan/lich-su" class="btn btn-secondary">Quay lại lịch sử</a>
+    </div>
 
-    <a href="/tai-khoan/lich-su" class="btn btn-secondary mb-3">Quay lại lịch sử</a>
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
 
     <div class="card shadow-sm mb-3">
         <div class="card-header card-jtech-header">Thông tin đơn hàng</div>
+
         <div class="card-body">
             <p><strong>Khách hàng:</strong> <span th:text="${order.customerName}"></span></p>
             <p><strong>Số điện thoại:</strong> <span th:text="${order.phone}"></span></p>
             <p><strong>Địa chỉ:</strong> <span th:text="${order.address}"></span></p>
             <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span></p>
-            <p><strong>Trạng thái đơn:</strong> <span th:text="${order.status}"></span></p>
-            <p><strong>Thanh toán:</strong> <span th:text="${order.paymentStatus}"></span></p>
+
             <p>
-                <strong>Tổng tiền:</strong>
-                <span class="text-danger fw-bold"
-                      th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                <strong>Trạng thái đơn:</strong>
+
+                <span class="badge bg-secondary" th:if="${order.status == 'Chờ xác nhận'}" th:text="${order.status}"></span>
+                <span class="badge bg-primary" th:if="${order.status == 'Đã xác nhận'}" th:text="${order.status}"></span>
+                <span class="badge bg-info text-dark" th:if="${order.status == 'Đang giao'}" th:text="${order.status}"></span>
+                <span class="badge bg-success" th:if="${order.status == 'Hoàn thành'}" th:text="${order.status}"></span>
+                <span class="badge bg-danger" th:if="${order.status == 'Đã hủy'}" th:text="${order.status}"></span>
             </p>
+
+            <p>
+                <strong>Thanh toán:</strong>
+                <span class="badge"
+                      th:classappend="${order.paymentStatus == 'Đã thanh toán'} ? 'bg-success' : 'bg-secondary'"
+                      th:text="${order.paymentStatus}">
+                </span>
+            </p>
+
+            <p>
+                <strong>Phương thức:</strong>
+                <span th:if="${order.paymentMethod == 'COD'}">Thanh toán khi nhận hàng</span>
+                <span th:if="${order.paymentMethod == 'BANK_TRANSFER'}">Chuyển khoản ngân hàng</span>
+                <span th:if="${order.paymentMethod != 'COD' and order.paymentMethod != 'BANK_TRANSFER'}"
+                      th:text="${order.paymentMethod}">
+                </span>
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Tạm tính:</strong>
+                <span th:text="${#numbers.formatDecimal(order.subtotalAmount != null ? order.subtotalAmount : order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+            </p>
+
+            <p th:if="${order.couponCode != null and !order.couponCode.isEmpty()}">
+                <strong>Mã giảm giá:</strong>
+                <span class="text-primary fw-bold" th:text="${order.couponCode}"></span>
+            </p>
+
+            <p th:if="${order.discountAmount != null and order.discountAmount > 0}">
+                <strong>Số tiền giảm:</strong>
+                <span class="text-success fw-bold"
+                      th:text="'-' + ${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                </span>
+            </p>
+
+            <p>
+                <strong>Tổng thanh toán:</strong>
+                <span class="text-danger fw-bold"
+                      th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                </span>
+            </p>
+
+            <form th:action="@{/tai-khoan/don-hang/{id}/huy(id=${order.id})}"
+                  method="post"
+                  th:if="${order.status == 'Chờ xác nhận'}">
+                <button class="btn btn-danger"
+                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                    Hủy đơn hàng
+                </button>
+            </form>
+
+            <div class="alert alert-warning mt-3" th:if="${order.status != 'Chờ xác nhận' and order.status != 'Đã hủy'}">
+                Đơn hàng đã được xử lý nên khách hàng không thể tự hủy.
+            </div>
         </div>
     </div>
 
     <h4>Sản phẩm đã mua</h4>
 
-    <table class="table table-bordered bg-white shadow-sm">
+    <table class="table table-bordered bg-white shadow-sm align-middle">
         <thead>
         <tr>
             <th>Sản phẩm</th>
@@ -65,17 +169,42 @@
         </tbody>
     </table>
 
-    <div class="card shadow-sm mb-3" th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus != 'Đã thanh toán'}">
+    <div class="card shadow-sm mb-3"
+         th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus != 'Đã thanh toán' and order.status != 'Đã hủy'}">
         <div class="card-header card-jtech-header">Thanh toán QR</div>
+
         <div class="card-body text-center">
-            <img th:src="@{/qr/payment/{id}(id=${order.id})}" style="max-width: 250px;">
-            <p class="mt-2">Nội dung chuyển khoản: <strong th:text="'JTECH' + ${order.id}"></strong></p>
+            <img th:src="@{/qr/payment/{id}(id=${order.id})}"
+                 style="max-width: 250px;"
+                 alt="Mã QR thanh toán">
+
+            <p class="mt-2">
+                Nội dung chuyển khoản:
+                <strong th:text="'JTECH' + ${order.id}"></strong>
+            </p>
+
+            <p>
+                Số tiền:
+                <strong class="text-danger"
+                        th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                </strong>
+            </p>
 
             <form th:action="@{/checkout/confirm-payment/{id}(id=${order.id})}" method="post">
-                <button class="btn btn-jtech">Tôi đã thanh toán</button>
+                <button class="btn btn-jtech"
+                        onclick="return confirm('Bạn xác nhận đã chuyển khoản cho đơn hàng này?')">
+                    Tôi đã thanh toán
+                </button>
             </form>
         </div>
     </div>
+
+    <div class="alert alert-jtech"
+         th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'Đã thanh toán'}">
+        Đơn hàng này đã được xác nhận thanh toán.
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

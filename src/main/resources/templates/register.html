@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Đăng ký</title>
+
+    <link rel="icon" type="image/png" href="/images/logos/favicon.png?v=5">
+    <link rel="shortcut icon" href="/images/logos/favicon.png?v=5">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -10,7 +14,14 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-jtech">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/">J-Tech Store</a>
+        <a class="navbar-brand brand-logo-link"
+           th:href="${session.currentUser != null and session.currentUser.role == 'ADMIN'} ? @{/admin/dashboard} : @{/}">
+            <span class="brand-logo-box">
+                <img src="/images/logos/logochinh-removebg.png"
+                     alt="J-Tech Store"
+                     class="brand-logo-img">
+            </span>
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
             <span class="navbar-toggler-icon"></span>
@@ -38,11 +49,13 @@
 
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/admin/dashboard">Dashboard</a></li>
-                        <li><a class="dropdown-item" href="/admin/categories">QL Danh mục</a></li>
-                        <li><a class="dropdown-item" href="/admin/products">QL Sản phẩm</a></li>
-                        <li><a class="dropdown-item" href="/admin/promotions">QL Khuyến mãi</a></li>
-                        <li><a class="dropdown-item" href="/admin/orders">QL Đơn hàng</a></li>
-                        <li><a class="dropdown-item" href="/admin/users">QL Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/categories">Danh mục</a></li>
+                        <li><a class="dropdown-item" href="/admin/products">Sản phẩm</a></li>
+                        <li><a class="dropdown-item" href="/admin/products/inventory">Tồn kho</a></li>
+                        <li><a class="dropdown-item" href="/admin/promotions">Khuyến mãi</a></li>
+                        <li><a class="dropdown-item" href="/admin/orders">Đơn hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/users">Khách hàng</a></li>
+                        <li><a class="dropdown-item" href="/admin/reviews">Đánh giá</a></li>
                     </ul>
                 </li>
             </ul>
@@ -53,7 +66,7 @@
                 </li>
 
                 <li class="nav-item" th:if="${session.currentUser == null}">
-                    <a class="nav-link" href="/register">Đăng ký</a>
+                    <a class="nav-link active" href="/register">Đăng ký</a>
                 </li>
 
                 <li class="nav-item" th:if="${session.currentUser != null}">
@@ -71,7 +84,7 @@
     </div>
 </nav>
 
-<div class="container mt-5" style="max-width: 550px;">
+<div class="container mt-5 mb-5" style="max-width: 600px;">
     <div class="card shadow-sm">
         <div class="card-header card-jtech-header">
             <h4 class="mb-0">Đăng ký tài khoản khách hàng</h4>
@@ -82,28 +95,74 @@
 
             <form method="post" action="/register" th:object="${user}">
                 <div class="mb-3">
-                    <label class="form-label">Tên đăng nhập</label>
-                    <input class="form-control" th:field="*{username}" required>
+                    <label class="form-label">
+                        Tên đăng nhập <span class="text-danger">*</span>
+                    </label>
+
+                    <input class="form-control"
+                           th:field="*{username}"
+                           placeholder="Ví dụ: nguyenvana"
+                           required>
+
+                    <div class="text-danger" th:errors="*{username}"></div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Mật khẩu</label>
-                    <input class="form-control" type="password" th:field="*{password}" required>
+                    <label class="form-label">
+                        Mật khẩu <span class="text-danger">*</span>
+                    </label>
+
+                    <input class="form-control"
+                           type="password"
+                           th:field="*{password}"
+                           placeholder="Nhập mật khẩu"
+                           required>
+
+                    <div class="text-danger" th:errors="*{password}"></div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Họ tên</label>
-                    <input class="form-control" th:field="*{fullName}" required>
+                    <label class="form-label">
+                        Họ tên <span class="text-danger">*</span>
+                    </label>
+
+                    <input class="form-control"
+                           th:field="*{fullName}"
+                           placeholder="Ví dụ: Nguyễn Văn A"
+                           required>
+
+                    <div class="text-danger" th:errors="*{fullName}"></div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Số điện thoại</label>
-                    <input class="form-control" th:field="*{phone}" required>
+                    <label class="form-label">
+                        Số điện thoại <span class="text-danger">*</span>
+                    </label>
+
+                    <input class="form-control"
+                           th:field="*{phone}"
+                           placeholder="Ví dụ: 0901234567"
+                           required>
+
+                    <div class="text-danger" th:errors="*{phone}"></div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input class="form-control" type="email" th:field="*{email}">
+                    <label class="form-label">
+                        Email <span class="text-danger">*</span>
+                    </label>
+
+                    <input class="form-control"
+                           type="email"
+                           th:field="*{email}"
+                           placeholder="Ví dụ: tenkhach@gmail.com"
+                           required>
+
+                    <div class="text-danger" th:errors="*{email}"></div>
+
+                    <div class="form-text">
+                        Email dùng để nhận mã quên mật khẩu và hóa đơn sau khi thanh toán.
+                    </div>
                 </div>
 
                 <button class="btn btn-jtech">Đăng ký</button>
@@ -113,6 +172,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

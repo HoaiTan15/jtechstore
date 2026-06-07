@@ -23,6 +23,16 @@ public class CategoryService {
     }
 
     public void save(Category category) {
+        if (category.getName() == null || category.getName().trim().isEmpty()) {
+            throw new RuntimeException("Tên danh mục không được để trống");
+        }
+
+        category.setName(category.getName().trim());
+
+        if (category.getDescription() != null) {
+            category.setDescription(category.getDescription().trim());
+        }
+
         categoryRepository.save(category);
     }
 

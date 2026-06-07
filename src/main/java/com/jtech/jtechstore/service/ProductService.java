@@ -17,7 +17,7 @@ public class ProductService {
 
     public List<Product> getAll(String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
-            return productRepository.findByNameContainingIgnoreCase(keyword);
+            return productRepository.findByNameContainingIgnoreCase(keyword.trim());
         }
 
         return productRepository.findAll();
@@ -39,7 +39,7 @@ public class ProductService {
 
         if (brand != null && !brand.trim().isEmpty()) {
             products = products.stream()
-                    .filter(p -> p.getBrand() != null && p.getBrand().equalsIgnoreCase(brand))
+                    .filter(p -> p.getBrand() != null && p.getBrand().equalsIgnoreCase(brand.trim()))
                     .toList();
         }
 
@@ -66,11 +66,17 @@ public class ProductService {
                         .toList();
             } else if (sort.equals("name_asc")) {
                 products = products.stream()
-                        .sorted(Comparator.comparing(Product::getName, String.CASE_INSENSITIVE_ORDER))
+                        .sorted(Comparator.comparing(
+                                p -> p.getName() != null ? p.getName() : "",
+                                String.CASE_INSENSITIVE_ORDER
+                        ))
                         .toList();
             } else if (sort.equals("name_desc")) {
                 products = products.stream()
-                        .sorted(Comparator.comparing(Product::getName, String.CASE_INSENSITIVE_ORDER).reversed())
+                        .sorted(Comparator.comparing(
+                                (Product p) -> p.getName() != null ? p.getName() : "",
+                                String.CASE_INSENSITIVE_ORDER
+                        ).reversed())
                         .toList();
             }
         }
@@ -98,8 +104,54 @@ public class ProductService {
     }
 
     public void save(Product product) {
+        if (product == null) {
+            throw new RuntimeException("Dữ liệu sản phẩm không hợp lệ");
+        }
+
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new RuntimeException("Tên sản phẩm không được để trống");
+        }
+
+        if (product.getPrice() == null) {
+            throw new RuntimeException("Giá sản phẩm không được để trống");
+        }
+
+        if (product.getPrice() < 0) {
+            throw new RuntimeException("Giá sản phẩm không được nhỏ hơn 0");
+        }
+
         if (product.getQuantity() == null) {
             product.setQuantity(0);
+        }
+
+        if (product.getQuantity() < 0) {
+            throw new RuntimeException("Số lượng tồn kho không được nhỏ hơn 0");
+        }
+
+        product.setName(product.getName().trim());
+
+        if (product.getBrand() != null) {
+            product.setBrand(product.getBrand().trim());
+        }
+
+        if (product.getCpu() != null) {
+            product.setCpu(product.getCpu().trim());
+        }
+
+        if (product.getRam() != null) {
+            product.setRam(product.getRam().trim());
+        }
+
+        if (product.getStorage() != null) {
+            product.setStorage(product.getStorage().trim());
+        }
+
+        if (product.getScreen() != null) {
+            product.setScreen(product.getScreen().trim());
+        }
+
+        if (product.getWarranty() != null) {
+            product.setWarranty(product.getWarranty().trim());
         }
 
         productRepository.save(product);

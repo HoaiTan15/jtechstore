@@ -7,6 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
+
+    List<Review> findAllByOrderByReviewDateDesc();
+
+    List<Review> findByRatingOrderByReviewDateDesc(Integer rating);
+
     List<Review> findByProductIdOrderByReviewDateDesc(Long productId);
 
     List<Review> findByProductIdAndRatingOrderByReviewDateDesc(Long productId, Integer rating);
@@ -19,6 +24,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query(value = "SELECT COUNT(*) FROM reviews WHERE product_id = ?1 AND rating = ?2", nativeQuery = true)
     Long countByProductIdAndRatingNative(Long productId, Integer rating);
+
+    @Query(value = "SELECT COUNT(*) FROM reviews WHERE rating = ?1", nativeQuery = true)
+    Long countByRatingNative(Integer rating);
 
     @Query(value = """
             SELECT COUNT(*)
